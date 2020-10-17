@@ -82,14 +82,10 @@
 
 #if defined( HB_OS_WIN )
 #  include <windows.h>
-#elif defined( HB_OS_DOS )
-#  include <dos.h>
 #endif
 
-#if defined( HB_MT_VM )
 #  include "hbthread.h"
 #  include "hbatomic.h"
-#endif
 
 #if defined( HB_FM_STD_ALLOC )
 #  undef HB_FM_DL_ALLOC
@@ -103,10 +99,8 @@
        * memory is used in file IO operations.
        */
 #     define HB_FM_STD_ALLOC
-#  elif defined( _MSC_VER ) || defined( __BORLANDC__ ) || defined( __MINGW32__ ) || \
-        ( defined( __WATCOMC__ ) && defined( HB_OS_WIN ) ) || \
-        defined( HB_OS_OS2 ) || \
-        ( defined( HB_FM_DLMT_ALLOC ) && defined( HB_MT_VM ) )
+#  elif defined( _MSC_VER ) || defined( __MINGW32__ ) || \
+      defined( HB_FM_DLMT_ALLOC )
 #     define HB_FM_DL_ALLOC
 #  else
       /* #define HB_FM_DL_ALLOC */
@@ -123,8 +117,7 @@
 /* #define HB_PARANOID_MEM_CHECK */
 
 #if defined( HB_FM_DL_ALLOC )
-#  if ! defined( HB_FM_DLMT_ALLOC ) && ! defined( HB_FM_DLMT_ALLOC_OFF ) && \
-      defined( HB_MT_VM )
+#  if ! defined( HB_FM_DLMT_ALLOC ) && ! defined( HB_FM_DLMT_ALLOC_OFF ) 
 #     if ! ( defined( HB_OS_WIN_CE ) && ( defined( _MSC_VER ) && ( _MSC_VER <= 1500 ) ) )
 #        define HB_FM_DLMT_ALLOC
 #     endif
@@ -137,7 +130,6 @@
 #     define FORCEINLINE      HB_FORCEINLINE
 #  endif
 #  define REALLOC_ZERO_BYTES_FREES
-#  if defined( HB_MT_VM )
 #     if defined( HB_SPINLOCK_R )
 #        define USE_LOCKS     2
 #     else
@@ -147,38 +139,9 @@
 #        define ONLY_MSPACES  1
 #        define FOOTERS       1
 #     endif
-#  else
-#     undef HB_FM_DLMT_ALLOC
-#     define USE_LOCKS        0
-#  endif
-#  if defined( __BORLANDC__ )
-#     pragma warn -aus
-#     pragma warn -ccc
-#     pragma warn -eff
-#     pragma warn -ngu
-#     pragma warn -prc
-#     pragma warn -rch
-#     pragma warn -inl
-#  elif defined( HB_OS_WIN_CE ) && defined( __POCC__ )
-#     define ABORT  TerminateProcess( GetCurrentProcess(), 0 )
-#  elif defined( __POCC__ ) && ! defined( InterlockedCompareExchangePointer )
-#     define InterlockedCompareExchangePointer
-#  elif defined( __WATCOMC__ )
-#     pragma warning 13 9
-#     pragma warning 367 9
-#     pragma warning 368 9
-#     pragma warning 887 9
-#     pragma disable_message ( 201 )
+#  if defined( _MSC_VER )
 #     if ! defined( USE_DL_PREFIX ) && ! defined( HB_FM_DLMT_ALLOC )
 #        define USE_DL_PREFIX
-#     endif
-#  elif defined( _MSC_VER )
-#     if ! defined( USE_DL_PREFIX ) && ! defined( HB_FM_DLMT_ALLOC )
-#        define USE_DL_PREFIX
-#     endif
-#     if defined( HB_OS_WIN_CE )
-#        define ABORT  TerminateProcess( GetCurrentProcess(), 0 )
-#        define LACKS_FCNTL_H
 #     endif
 #     pragma warning( push )
 #     pragma warning( disable : 4702 )
@@ -202,22 +165,7 @@
 #     endif
 #  endif
 #  include "dlmalloc.c"
-#  if defined( __BORLANDC__ )
-#     pragma warn +aus
-#     pragma warn +ccc
-#     pragma warn +eff
-#     pragma warn +ngu
-#     pragma warn +prc
-#     pragma warn +rch
-#     pragma warn +inl
-#  elif defined( __WATCOMC__ )
-#     pragma warning 13 2
-#     pragma warning 367 2
-#     pragma warning 368 2
-#     pragma warning 887 2
-#     pragma warning 887 2
-#     pragma enable_message ( 201 )
-#  elif defined( _MSC_VER )
+#  if defined( _MSC_VER )
 #     pragma warning( pop )
 #  endif
 #  if defined( HB_FM_DLMT_ALLOC )
@@ -247,8 +195,7 @@
 #  endif
 #endif
 
-#if defined( HB_MT_VM ) && \
-    ( defined( HB_FM_STATISTICS ) || defined( HB_FM_DLMT_ALLOC ) || \
+#if ( defined( HB_FM_STATISTICS ) || defined( HB_FM_DLMT_ALLOC ) || \
       ! defined( HB_ATOM_INC ) || ! defined( HB_ATOM_DEC ) )
 
    static HB_CRITICAL_NEW( s_fmMtx );
@@ -345,16 +292,8 @@ typedef void * PHB_MEMINFO;
 #define HB_MEM_PTR( p )     ( ( void * ) ( ( HB_BYTE * ) ( p ) + HB_MEMINFO_SIZE ) )
 
 
-#if ! defined( HB_MT_VM )
 
-#  undef HB_ATOM_DEC
-#  undef HB_ATOM_INC
-#  undef HB_ATOM_GET
-#  undef HB_ATOM_SET
-#  define HB_ATOM_INC( p )  ( ++( *( p ) ) )
-#  define HB_ATOM_DEC( p )  ( --( *( p ) ) )
-
-#elif ! defined( HB_ATOM_INC ) || ! defined( HB_ATOM_DEC )
+#if ! defined( HB_ATOM_INC ) || ! defined( HB_ATOM_DEC )
 
    /* HB_ATOM_INC and HB_ATOM_DEC have to be synced together */
 #  undef HB_ATOM_DEC
@@ -1595,7 +1534,7 @@ HB_FUNC( __FM_ALLOCLIMIT )
    {
 #if defined( HB_FM_DLMT_ALLOC )
       hb_retns( mspace_footprint_limit( hb_mspace() ) );
-      if( HB_ISNUM( 1 ) )
+      if( HB_IS_PARAM_NUM( 1 ) )
       {
          HB_ISIZ nLimit = hb_parns( 1 );
 
@@ -1605,7 +1544,7 @@ HB_FUNC( __FM_ALLOCLIMIT )
       }
 #elif defined( HB_FM_DL_ALLOC )
       hb_retns( dlmalloc_footprint_limit() );
-      if( HB_ISNUM( 1 ) )
+      if( HB_IS_PARAM_NUM( 1 ) )
       {
          HB_ISIZ nLimit = hb_parns( 1 );
 
@@ -1615,7 +1554,7 @@ HB_FUNC( __FM_ALLOCLIMIT )
       }
 #elif defined( HB_FM_STATISTICS )
       hb_retns( s_nMemoryLimConsumed ? s_nMemoryLimConsumed : -1 );
-      if( HB_ISNUM( 1 ) )
+      if( HB_IS_PARAM_NUM( 1 ) )
       {
          HB_ISIZ nLimit = hb_parns( 1 );
 

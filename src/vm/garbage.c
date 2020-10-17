@@ -60,7 +60,6 @@
 
 #if ! defined( HB_GC_PTR )
 
-#if defined( HB_MT_VM )
 
 #  include "hbthread.h"
 #  include "hbatomic.h"
@@ -81,12 +80,6 @@
 
 #endif
 
-#else
-
-#  define HB_GC_LOCK()       do {} while( 0 )
-#  define HB_GC_UNLOCK()     do {} while( 0 )
-
-#endif /* HB_MT_VM */
 
 /* holder of memory block information */
 /* NOTE: HB_USHORT is used intentionally to fill up the structure to
@@ -789,7 +782,7 @@ HB_FUNC( HB_GCSETAUTO )
    HB_STACK_TLS_PRELOAD
 
    HB_PTRUINT nBlocks, nPrevBlocks;
-   HB_BOOL fSet = HB_ISNUM( 1 );
+   HB_BOOL fSet = HB_IS_PARAM_NUM( 1 );
 
    nBlocks = fSet ? hb_parnint( 1 ) * 1000 : 0;
 

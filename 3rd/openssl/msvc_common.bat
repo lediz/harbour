@@ -22,11 +22,12 @@ SET OPENSSL_BUILD=1
 echo == cd %ROOT_DIR%\3rd\%LIBRARY%\%LIB_SOURCE_DIR% ========
 cd %ROOT_DIR%\3rd\%LIBRARY%\%LIB_SOURCE_DIR%
 
-REM call "cpan Text:Template"
+git clean -x -d -f .
 
 perl Configure --prefix=%LIB_TARGET% --openssldir=%LIB_TARGET% %OPENSSL_ARCH%
 nmake -f makefile clean install
 
+git checkout -f .
 cd %ROOT_DIR%\3rd\%LIBRARY%
 
 echo == %LIB_TARGET% ==

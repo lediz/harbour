@@ -436,7 +436,7 @@ HB_FUNC( BIO_GET_CLOSE )
 
 HB_FUNC( BIO_NEW_SOCKET )
 {
-   if( HB_ISNUM( 1 ) )
+   if( HB_IS_PARAM_NUM( 1 ) )
       hb_BIO_ret( BIO_new_socket( hb_parni( 1 ), hb_parnidef( 2, BIO_NOCLOSE ) ) );
    else
       hb_errRT_BASE( EG_ARG, 2010, NULL, HB_ERR_FUNCNAME, HB_ERR_ARGS_BASEPARAMS );
@@ -445,7 +445,7 @@ HB_FUNC( BIO_NEW_SOCKET )
 HB_FUNC( BIO_NEW_DGRAM )
 {
 #ifndef OPENSSL_NO_DGRAM
-   if( HB_ISNUM( 1 ) )
+   if( HB_IS_PARAM_NUM( 1 ) )
       hb_BIO_ret( BIO_new_dgram( hb_parni( 1 ), hb_parnidef( 2, BIO_NOCLOSE ) ) );
    else
       hb_errRT_BASE( EG_ARG, 2010, NULL, HB_ERR_FUNCNAME, HB_ERR_ARGS_BASEPARAMS );
@@ -456,21 +456,12 @@ HB_FUNC( BIO_NEW_DGRAM )
 
 HB_FUNC( BIO_NEW_FD )
 {
-   if( HB_ISNUM( 1 ) )
+   if( HB_IS_PARAM_NUM( 1 ) )
       hb_BIO_ret( BIO_new_fd( hb_parnl( 1 ), hb_parnidef( 2, BIO_NOCLOSE ) ) );
    else
       hb_errRT_BASE( EG_ARG, 2010, NULL, HB_ERR_FUNCNAME, HB_ERR_ARGS_BASEPARAMS );
 }
 
-#if defined( HB_LEGACY_LEVEL4 )
-HB_FUNC( BIO_NEW_FILE )
-{
-   if( HB_ISCHAR( 1 ) )
-      hb_BIO_ret( BIO_new_file( hb_parc( 1 ), hb_parcx( 2 ) ) );
-   else
-      hb_errRT_BASE( EG_ARG, 2010, NULL, HB_ERR_FUNCNAME, HB_ERR_ARGS_BASEPARAMS );
-}
-#endif
 
 HB_FUNC( BIO_NEW_MEM_BUF )
 {
@@ -496,7 +487,7 @@ HB_FUNC( BIO_READ )
 
    if( bio )
    {
-      int size = HB_ISNUM( 3 ) ? hb_parni( 3 ) : ( int ) hb_parclen( 2 );
+      int size = HB_IS_PARAM_NUM( 3 ) ? hb_parni( 3 ) : ( int ) hb_parclen( 2 );
 
       if( size > 0 )
       {
@@ -523,7 +514,7 @@ HB_FUNC( BIO_GETS )
 
    if( bio )
    {
-      int size = HB_ISNUM( 3 ) ? hb_parni( 3 ) : ( int ) hb_parclen( 2 );
+      int size = HB_IS_PARAM_NUM( 3 ) ? hb_parni( 3 ) : ( int ) hb_parclen( 2 );
 
       if( size > 0 )
       {
@@ -552,7 +543,7 @@ HB_FUNC( BIO_WRITE )
    {
       int size = ( int ) hb_parclen( 2 );
 
-      if( HB_ISNUM( 3 ) )
+      if( HB_IS_PARAM_NUM( 3 ) )
       {
          int towrite = hb_parni( 3 );
          if( towrite >= 0 && towrite < size )

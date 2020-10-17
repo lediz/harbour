@@ -1,7 +1,6 @@
 ROOT := ../
 
 C_HEADERS := \
-   clipdefs.h \
    extend.h \
    hbapi.h \
    hbapicdp.h \
@@ -73,6 +72,9 @@ C_HEADERS := \
    hb_io.h \
    hbhpdf.h \
    hbposix.h \
+   hbole.ch \
+   hbsim.ch \
+   hbwin.ch \
 
 PRG_HEADERS := \
    harbour.hbx \

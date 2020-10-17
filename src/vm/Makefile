@@ -2,30 +2,8 @@ ROOT := ../../
 
 include $(TOP)$(ROOT)config/global.mk
 
-ifeq ($(HB_HVM_ALL),)
-
-   HB_HVM_ALL := yes
-   ifeq ($(HB_COMPILER),watcom)
-      ifeq ($(HB_BUILD_MODE),cpp)
-         HB_HVM_ALL := no
-      endif
-   endif
-   ifeq ($(HB_COMPILER),bcc)
-      HB_HVM_ALL := no
-   endif
-   ifeq ($(HB_COMPILER),pocc)
-      HB_HVM_ALL := no
-   endif
-   ifeq ($(HB_COMPILER),pocc64)
-      HB_HVM_ALL := no
-   endif
-   ifeq ($(HB_COMPILER),poccarm)
-      HB_HVM_ALL := no
-   endif
-   export HB_HVM_ALL
-endif
-
-DIRS :=
+#vpath %.c ../
+#vpath %.prg ../
 
 ifeq ($(HB_PLATFORM),win)
    ifneq ($(filter $(HB_COMPILER),mingw mingw64),)
@@ -33,35 +11,20 @@ ifeq ($(HB_PLATFORM),win)
    else
       C_MAIN := mainstd.c mainwin.c
    endif
-   DIRS := mainstd mainwin maindllh maindllp
 else
    ifeq ($(HB_PLATFORM),cygwin)
-      C_MAIN := mainstd.c
-      DIRS := mainstd maindllh maindllp
+      C_MAIN := mainwin.c
    else
-      ifeq ($(HB_PLATFORM),wce)
-         C_MAIN := mainwin.c
-         DIRS := mainstd mainwin maindllh maindllp
-      else
-         ifeq ($(HB_PLATFORM),os2)
-            C_MAIN := mainstd.c
-            DIRS := mainstd maindllh
-         else
-            ifeq ($(HB_PLATFORM)-$(HB_COMPILER),dos-watcom)
-               DIRS := mainstd
-            endif
-            C_MAIN := main.c
-         endif
-      endif
+      C_MAIN := mainstd.c
    endif
 endif
 
-ifeq ($(HB_HVM_ALL),yes)
-
-C_SOURCES := \
-   hvmall.c \
-
-else
+#ifeq ($(HB_HVM_ALL),yes)
+#
+#C_SOURCES := \
+#   hvmall.c \
+#
+#else
 
 C_SOURCES := \
    hvm.c \
@@ -81,7 +44,7 @@ C_SOURCES := \
    set.c \
    thread.c \
 
-endif
+#endif
 
 C_SOURCES += \
    arrayshb.c \
@@ -105,29 +68,14 @@ C_SOURCES += \
    proc.c \
    procaddr.c \
    runner.c \
-   short.c \
    vm.c \
    $(C_MAIN) \
 
 PRG_SOURCES := \
    harbinit.prg \
 
-LIBNAME := hbvm
+LIBNAME := hbvmmt
 
-ifneq ($(HB_MT),yes)
-ifeq ($(HB_PLATFORM),dos)
-ifneq ($(HB_COMPILER),djgpp)
-ifneq ($(HB_COMPILER),watcom)
-   HB_MT := no
-endif
-endif
-endif
-endif
-ifneq ($(HB_MT),no)
-   DIRS += vmmt
-endif
+#HB_CFLAGS += -DHB_MT_VM
 
 include $(TOP)$(ROOT)config/lib.mk
-ifneq ($(DIRS),)
-   include $(TOP)$(ROOT)config/dir.mk
-endif

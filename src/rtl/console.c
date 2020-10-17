@@ -188,15 +188,6 @@ HB_FUNC( HB_EOL )
    hb_retc_const( s_szEOL );
 }
 
-#if defined( HB_LEGACY_LEVEL4 )
-
-/* Deprecated */
-HB_FUNC( HB_OSNEWLINE )
-{
-   hb_retc_const( s_szEOL );
-}
-
-#endif
 
 HB_FUNC( HB_STREOL )
 {
@@ -520,7 +511,7 @@ static void hb_conDevPos( int iRow, int iCol )
 
 HB_FUNC( DEVPOS ) /* Sets the screen and/or printer position */
 {
-   if( HB_ISNUM( 1 ) && HB_ISNUM( 2 ) )
+   if( HB_IS_PARAM_NUM( 1 ) && HB_IS_PARAM_NUM( 2 ) )
       hb_conDevPos( hb_parni( 1 ), hb_parni( 2 ) );
 
    hb_itemReturn( hb_param( 1, HB_IT_ANY ) );
@@ -528,7 +519,7 @@ HB_FUNC( DEVPOS ) /* Sets the screen and/or printer position */
 
 HB_FUNC( SETPRC ) /* Sets the current printer row and column positions */
 {
-   if( hb_pcount() == 2 && HB_ISNUM( 1 ) && HB_ISNUM( 2 ) )
+   if( hb_pcount() == 2 && HB_IS_PARAM_NUM( 1 ) && HB_IS_PARAM_NUM( 2 ) )
    {
       PHB_PRNPOS pPrnPos = hb_prnPos();
       pPrnPos->row = hb_parni( 1 );
@@ -652,7 +643,7 @@ HB_FUNC( HB_DISPOUTAT )
 
       if( HB_ISCHAR( 4 ) )
          iColor = hb_gtColorToN( hb_parc( 4 ) );
-      else if( HB_ISNUM( 4 ) )
+      else if( HB_IS_PARAM_NUM( 4 ) )
          iColor = hb_parni( 4 );
       else
          iColor = -1;
@@ -682,7 +673,7 @@ HB_FUNC( HB_DISPOUTATBOX )
 
       if( HB_ISCHAR( 4 ) )
          iColor = hb_gtColorToN( hb_parc( 4 ) );
-      else if( HB_ISNUM( 4 ) )
+      else if( HB_IS_PARAM_NUM( 4 ) )
          iColor = hb_parni( 4 );
       else
          iColor = hb_gtGetCurrColor();

@@ -55,7 +55,7 @@ PROCEDURE Main( ... )
    LOCAL cDynVersionless
    LOCAL cFile, cSrcLibDir, aLibs
    LOCAL cPostgreSQLBin, cPostgreSQLLib, cZlibDir
-   LOCAL cLibDest, cBinDest
+   LOCAL cLibDest, cBinDest, cCurlBin, cCurlLib, cSqlite3Bin, cOpenSSLLib
 
    IF HB_ISSTRING( hb_PValue( 1 ) ) .AND. Lower( hb_PValue( 1 ) ) == "-rehbx"
       mk_extern_core_manual( hb_PValue( 2 ), hb_PValue( 3 ) )
@@ -123,6 +123,7 @@ PROCEDURE Main( ... )
             aLibs := { ;
                cSrcLibDir + "\libpq.lib", ;
                cSrcLibDir + "\zdll.lib",   ;
+               cSrcLibDir + "\zdlib.lib",   ;
                cSrcLibDir + "\sqlite3.lib" ;
             }
          ELSE
@@ -144,8 +145,20 @@ PROCEDURE Main( ... )
          cPostgreSQLLib :=  GetEnvC( "ROOT_DIR" ) + hb_ps() +  "3rd" + hb_ps() + GetEnvC( "BUILD_ARCH" )
          cPostgreSQLLib +=  hb_ps() + "postgresql" + hb_ps() + "lib" + hb_ps()
 
+         cCurlBin :=  GetEnvC( "ROOT_DIR" ) + hb_ps() +  "3rd" + hb_ps() + GetEnvC( "BUILD_ARCH" )
+         cCurlBin +=  hb_ps() + "curl" + hb_ps() + "bin" + hb_ps()
+
+         cCurlLib :=  GetEnvC( "ROOT_DIR" ) + hb_ps() +  "3rd" + hb_ps() + GetEnvC( "BUILD_ARCH" )
+         cCurlLib +=  hb_ps() + "curl" + hb_ps() + "lib" + hb_ps()
+
          cZlibDir := GetEnvC( "ROOT_DIR" ) + hb_ps() +  "3rd" + hb_ps() + GetEnvC( "BUILD_ARCH" )
          cZlibDir +=  hb_ps() + "zlib" + hb_ps() + "lib" + hb_ps()
+
+         cSqlite3Bin := GetEnvC( "ROOT_DIR" ) + hb_ps() +  "3rd" + hb_ps() + GetEnvC( "BUILD_ARCH" )
+         cSqlite3Bin +=  hb_ps() + "sqlite3" + hb_ps() + "bin" + hb_ps()
+         
+         cOpenSSLLib := GetEnvC( "ROOT_DIR" ) + hb_ps() +  "3rd" + hb_ps() + GetEnvC( "BUILD_ARCH" )
+         cOpenSSLLib +=  hb_ps() + "openssl" + hb_ps() + "lib" + hb_ps()
          
          IF hb_Version( HB_VERSION_BUILD_PLAT ) == "win"
             aLibs := { ;
@@ -158,8 +171,6 @@ PROCEDURE Main( ... )
                cPostgreSQLBin + "libpgtypes.dll", ;
                cPostgreSQLBin + "libiconv.dll", ;
                cPostgreSQLBin + "libpq.dll", ;
-               cPostgreSQLBin + "libxml2.dll", ;
-               cPostgreSQLBin + "libxml2.dll", ;
                cPostgreSQLBin + "libxml2.dll", ;
                cPostgreSQLBin + "createdb.exe", ;
                cPostgreSQLBin + "createuser.exe", ;
@@ -192,13 +203,15 @@ PROCEDURE Main( ... )
                cPostgreSQLBin + "reindexdb.exe", ;
                cPostgreSQLBin + "vacuumdb.exe", ;
                cPostgreSQLBin + "vacuumlo.exe", ;
-               cPostgreSQLBin + "zic.exe" ;
+               cPostgreSQLBin + "zic.exe", ;
+               cCurlBin + "curl.exe", ;
+               cSqlite3Bin + "sqlite3.exe" ;
             }
             
             cBinDest := GetEnvC( "HB_INSTALL_BIN" )
             FOR EACH cFile IN aLibs
                OutStd( "Copying " + cFile + " binaries to " + cBinDest + hb_eol() )
-                mk_hb_vfCopyFile( cFile, tmp + hb_ps(), .F.,, .T. ) // mandatory .F. for binaries
+                mk_hb_vfCopyFile( cFile, cBinDest + hb_ps(), .F.,, .T. ) // mandatory .F. for binaries
             NEXT
 
          ELSE
@@ -261,7 +274,14 @@ PROCEDURE Main( ... )
                cPostgreSQLLib + "utf8_and_sjis2004.so", ;
                cPostgreSQLLib + "utf8_and_sjis.so", ;
                cPostgreSQLLib + "utf8_and_uhc.so", ;
-               cPostgreSQLLib + "utf8_and_win.so" ;
+               cPostgreSQLLib + "utf8_and_win.so", ;
+               cOpenSSLLib + "libssl.a", ;
+               cOpenSSLLib + "libcrypto.a", ;
+               cOpenSSLLib + "libssl.so", ;
+               cOpenSSLLib + "libcrypto.so", ;
+               cCurlBin + "curl", ;
+               cCurlLib + "libcurl.so", ;
+               cSqlite3Bin + "sqlite3" ;
             }
             cBinDest := GetEnvC( "HB_INSTALL_BIN" )
             cLibDest := GetEnvC( "HB_INSTALL_LIB" )
@@ -296,8 +316,7 @@ PROCEDURE Main( ... )
 
 
 
-      IF ! Empty( GetEnvC( "HB_INSTALL_BIN" ) ) .AND. ;
-            ! GetEnvC( "HB_BUILD_PARTS" ) == "lib"
+      IF ! Empty( GetEnvC( "HB_INSTALL_BIN" ) ) //.AND. ! GetEnvC( "HB_BUILD_PARTS" ) == "lib"
 
          OutStd( "! Copying Harbour script files..." + hb_eol() )
 
